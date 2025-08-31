@@ -1,10 +1,7 @@
 package com.AndresSanchezDev.SISTEMASPURI.controller;
 
 import com.AndresSanchezDev.SISTEMASPURI.entity.*;
-import com.AndresSanchezDev.SISTEMASPURI.entity.DTO.DetalleVentaDTO;
-import com.AndresSanchezDev.SISTEMASPURI.entity.DTO.DetalleVentaResponseDTO;
-import com.AndresSanchezDev.SISTEMASPURI.entity.DTO.VentaDTO;
-import com.AndresSanchezDev.SISTEMASPURI.entity.DTO.VentaResponseDTO;
+import com.AndresSanchezDev.SISTEMASPURI.entity.DTO.*;
 import com.AndresSanchezDev.SISTEMASPURI.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/ventas")
 public class VentaController {
 
+    private final VentaDTOService ventaDTOService;
     private final VentaService ventaService;
     private final ClienteService clienteService;
     private final VendedorService vendedorService;
@@ -27,31 +25,19 @@ public class VentaController {
                            ClienteService clienteService,
                            VendedorService vendedorService,
                            ProductoService productoService,
-                           DetalleVentaService detalleVentaService) {
+                           DetalleVentaService detalleVentaService,
+                           VentaDTOService ventaDTOService) {
         this.ventaService = ventaService;
         this.clienteService = clienteService;
         this.vendedorService = vendedorService;
         this.productoService = productoService;
         this.detalleVentaService = detalleVentaService;
+        this.ventaDTOService = ventaDTOService;
     }
 
     @GetMapping
-    public List<VentaResponseDTO> listarVentas() {
-        List<Venta> ventas = ventaService.findAll();
-        List<VentaResponseDTO> response = new ArrayList<>();
-
-        for (Venta v : ventas) {
-            VentaResponseDTO dto = new VentaResponseDTO();
-            dto.setId(v.getId());
-            dto.setFecha(v.getFecha());
-            dto.setVendedorId(v.getVendedor().getId());
-            dto.setClienteId(v.getCliente().getId());
-
-            setDetallesDTO(v, dto);
-            response.add(dto);
-        }
-
-        return response;
+    public List<VentaResponseDTO2> listarVentas() {
+        return ventaDTOService.getTodasLasVentasDTO();
     }
 
     @PostMapping("/crear")
@@ -166,5 +152,10 @@ public class VentaController {
 
         // Eliminar la venta
         ventaService.deleteById(id);
+    }
+
+    @GetMapping("/{id}")
+    public VentaResponseDTO2 obtenerVenta(@PathVariable Long id) {
+        return ventaDTOService.getVentaDTO(id);
     }
 }
